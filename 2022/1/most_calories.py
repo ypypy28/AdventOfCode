@@ -31,4 +31,7 @@ class ElfIterator:
 
 res = nlargest(3, ElfIterator("input.txt"), key=lambda elf: elf.calories)
 
-print(f'ANSWER: {sum(e.calories for e in res)} ({res})')
+print(f'ANSWER:',
+      f'Part 1: {res[0].calories}',
+      f'Part 2: {sum(e.calories for e in res)}\n({res})',
+      sep='\n')
