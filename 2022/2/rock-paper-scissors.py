@@ -33,14 +33,14 @@ STRATEGIES = {
 }
 
 
-def get_result_part1(opponent: str, me: str) -> int:
+def get_result_part1(opponent: str, me: str) -> Result:
     match (opponent, me):
         case ('A', 'X') | ('B', 'Y') | ('C', 'Z'):
-            return Result.DRAW.value
+            return Result.DRAW
         case ('A', 'Y') | ('B', 'Z') | ('C', 'X'):
-            return Result.WIN.value
+            return Result.WIN
         case ('A', 'Z') | ('B', 'X') | ('C', 'Y'):
-            return Result.LOSE.value
+            return Result.LOSE
         case _:
             raise NotImplementedError
 
@@ -51,7 +51,7 @@ def get_my_shape_score_part2(opponent: str, result: str) -> int:
 
 
 def get_round_score(lst: list[str]) -> tuple[int, int]:
-    return (MY_TURN["PART 1"][lst[1]] + get_result_part1(*lst),
+    return (MY_TURN["PART 1"][lst[1]] + get_result_part1(*lst).value,
             get_my_shape_score_part2(*lst) + RESULT_PART2[lst[1]].value)
 
 
