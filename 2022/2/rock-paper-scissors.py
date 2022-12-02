@@ -7,16 +7,17 @@ class Result(Enum):
     WIN = 6
 
 
-MY_TURN_PART1 = {
-    'X': 1,
-    'Y': 2,
-    'Z': 3,
-}
-
-MY_TURN_PART2 = {
-    'A': 1,
-    'B': 2,
-    'C': 3,
+MY_TURN = {
+    "PART 1": {
+        'X': 1,
+        'Y': 2,
+        'Z': 3,
+    },
+    "PART 2": {
+        'A': 1,
+        'B': 2,
+        'C': 3,
+    },
 }
 
 RESULT_PART2 = {
@@ -32,27 +33,26 @@ STRATEGIES = {
 }
 
 
-def get_result_part1(opponent: str, me: str) -> Result:
+def get_result_part1(opponent: str, me: str) -> int:
     match (opponent, me):
         case ('A', 'X') | ('B', 'Y') | ('C', 'Z'):
-            return Result.DRAW
+            return Result.DRAW.value
         case ('A', 'Y') | ('B', 'Z') | ('C', 'X'):
-            return Result.WIN
+            return Result.WIN.value
         case ('A', 'Z') | ('B', 'X') | ('C', 'Y'):
-            return Result.LOSE
+            return Result.LOSE.value
         case _:
-            raise NotImplemented
+            raise NotImplementedError
 
 
-def get_my_shape_score_part2(opponent: str, result: str) -> str:
+def get_my_shape_score_part2(opponent: str, result: str) -> int:
     my_shape = STRATEGIES[RESULT_PART2[result]][opponent]
-    return MY_TURN_PART2[my_shape]
+    return MY_TURN["PART 2"][my_shape]
 
 
-def get_round_score(lst: list[str, str]) -> tuple[int, int]:
-    return (MY_TURN_PART1[lst[1]] + get_result_part1(*lst).value,
+def get_round_score(lst: list[str]) -> tuple[int, int]:
+    return (MY_TURN["PART 1"][lst[1]] + get_result_part1(*lst),
             get_my_shape_score_part2(*lst) + RESULT_PART2[lst[1]].value)
-
 
 
 if __name__ == "__main__":
