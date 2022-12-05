@@ -27,6 +27,22 @@ def get_default_stacks(header: list[str]) -> list[list[str]]:
     return stacks
 
 
+def rearrangements_part1(
+    cargos: int, from_: int, to_: int,
+    stack: list[list[str]]
+) -> None:
+    for _ in range(cargos):
+        cargo = stacks[from_].pop()
+        stacks[to_].append(cargo)
+
+def rearrangements_part2(
+    cargos: int, from_: int, to_: int,
+    stk: list[list[str]]
+) -> None:
+    stk[to_] += stk[from_][-cargos:]
+    stk[from_] = stk[from_][:-cargos]
+
+
 inputfile = "input.txt"
 with open(inputfile, 'r') as f:
     header = read_header(f)
@@ -37,15 +53,9 @@ with open(inputfile, 'r') as f:
     for line in f:
         _, cargos, _, from_, _, to_ = line.split()
         cargos = int(cargos)
-        from_, to_ = (int(n)-1 for n in (from_, to_))
-        # For Part 1
-        for _ in range(cargos):
-            cargo = stacks[from_].pop()
-            stacks[to_].append(cargo)
-
-        # For Part 2
-        stacks2[to_] += stacks2[from_][-cargos:]
-        stacks2[from_] = stacks2[from_][:-cargos]
+        from_, to_ = int(from_)-1, int(to_)-1
+        rearrangements_part1(cargos, from_, to_, stacks)
+        rearrangements_part2(cargos, from_, to_, stacks2)
 
 
 print("ANSWER:",
