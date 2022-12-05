@@ -1,11 +1,5 @@
-from typing.io import TextIO
-
-
-def read_header(fd: TextIO) -> list[str]:
-    header = []
-    while (line:=f.readline()) != '\n':
-        header.append(line.rstrip('\n'))
-    return header
+import sys
+from typing import TextIO
 
 
 def count_stacks(header: list[str]) -> tuple[int, int]:
@@ -29,23 +23,23 @@ def get_default_stacks(header: list[str]) -> list[list[str]]:
 
 def rearrangements_part1(
     cargos: int, from_: int, to_: int,
-    stack: list[list[str]]
+    stacks: list[list[str]]
 ) -> None:
     for _ in range(cargos):
         cargo = stacks[from_].pop()
         stacks[to_].append(cargo)
 
+
 def rearrangements_part2(
     cargos: int, from_: int, to_: int,
-    stk: list[list[str]]
+    stacks: list[list[str]]
 ) -> None:
-    stk[to_] += stk[from_][-cargos:]
-    stk[from_] = stk[from_][:-cargos]
+    stacks[to_] += stacks[from_][-cargos:]
+    stacks[from_] = stacks[from_][:-cargos]
 
 
-inputfile = "input.txt"
-with open(inputfile, 'r') as f:
-    header = read_header(f)
+def solve_task(f: TextIO) -> tuple[str, str]:
+    header = list(iter(f.readline, '\n'))
     stacks = get_default_stacks(header)
     stacks2 = [[cargo for cargo in st] for st in stacks]
 
@@ -57,8 +51,16 @@ with open(inputfile, 'r') as f:
         rearrangements_part1(cargos, from_, to_, stacks)
         rearrangements_part2(cargos, from_, to_, stacks2)
 
+    return tuple(''.join(st[-1] for st in stks) for stks in (stacks, stacks2))
 
-print("ANSWER:",
-      f"PART 1: {''.join(st[-1] for st in stacks)}",
-      f"PART 2: {''.join(st[-1] for st in stacks2)}",
-      sep='\n')
+
+if __name__ == "__main__":
+    filename = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
+    with open(filename, 'r') as f:
+        part1, part2 = solve_task(f)
+
+
+    print("ANSWER:",
+        f"PART 1: {part1}",
+        f"PART 2: {part2}",
+        sep='\n')
