@@ -29,21 +29,25 @@ with open("input.txt", 'r') as f:
                     stacks[stack_i][height-1] = line[i]
         height -=1
 
-    # print('BEFORE:', *enumerate(stacks), sep='\n')
+
+    stacks2 = [[cargo for cargo in st] for st in stacks]
 
     # execute rearrangements
     for line in f:
-        _, repeat, _, from_, _, to_ = line.split()
-        for _ in range(int(repeat)):
-            cargo = stacks[int(from_)-1].pop()
-            stacks[int(to_)-1].append(cargo)
+        _, cargos, _, from_, _, to_ = line.split()
+        cargos = int(cargos)
+        from_, to_ = (int(n)-1 for n in (from_, to_))
+        # For Part 1
+        for _ in range(cargos):
+            cargo = stacks[from_].pop()
+            stacks[to_].append(cargo)
 
+        # For Part 2
+        stacks2[to_] += stacks2[from_][-cargos:]
+        stacks2[from_] = stacks2[from_][:-cargos]
 
-
-# print('AFTER:', *enumerate(stacks), sep='\n')
 
 print("ANSWER:",
       f"PART 1: {''.join(st[-1] for st in stacks)}",
-      f"PART 2: {None}",
+      f"PART 2: {''.join(st[-1] for st in stacks2)}",
       sep='\n')
-
