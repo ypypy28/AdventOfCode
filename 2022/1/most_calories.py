@@ -7,12 +7,11 @@ Elf = namedtuple("Elf", "id calories")
 
 class ElfIterator:
     def __init__(self, filename):
-        self.filename = filename
         self.__i = 0
         self.__EOF = False
+        self.f = open(filename, 'r')
 
     def __iter__(self):
-        self.f = open(self.filename, 'r')
         return self
 
     def __next__(self):
