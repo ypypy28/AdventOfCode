@@ -8,6 +8,7 @@ aocd = "*"
 
 [dev-packages]
 mypy = "*"
+memray = "*"
 
 [requires]
 python_version = "3.11"
