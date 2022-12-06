@@ -1,4 +1,3 @@
-import sys
 from typing import TextIO
 
 
@@ -55,8 +54,7 @@ def solve_task(f: TextIO) -> tuple[str, str]:
 
 
 if __name__ == "__main__":
-    filename = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-    with open(filename, 'r') as f:
+    with open("input.txt", 'r') as f:
         part1, part2 = solve_task(f)
 
 
