@@ -45,9 +45,9 @@ def solve_task(f: TextIO) -> tuple[str, str]:
 
     # execute rearrangements
     for line in f:
-        _, cargos, _, from_, _, to_ = line.split()
-        cargos = int(cargos)
-        from_, to_ = int(from_)-1, int(to_)-1
+        _, cargos_str, _, from_str, _, to_str = line.split()
+        cargos = int(cargos_str)
+        from_, to_ = int(from_str)-1, int(to_str)-1
         rearrangements_part1(cargos, from_, to_, stacks)
         rearrangements_part2(cargos, from_, to_, stacks2)
 
