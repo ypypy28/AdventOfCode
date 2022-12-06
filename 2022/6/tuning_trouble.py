@@ -1,25 +1,23 @@
 from array import array
-from collections import deque
 
 
 PACKET_MARKER_SIZE = 4
 MESSAGE_MARKER_SIZE = 14
-buf_packet = deque(maxlen=PACKET_MARKER_SIZE)
-buf_message = deque(maxlen=MESSAGE_MARKER_SIZE)
+buf = array('B')
 start_packet = start_message = -1
-with open("input.txt", 'r') as f:
-    stream = f.read(PACKET_MARKER_SIZE)
-    buf_packet.extend(stream)
-    buf_message.extend(stream)
+with open("input.txt", 'rb') as f:
+    buf.fromfile(f, PACKET_MARKER_SIZE)
 
-    while len(set(buf_packet)) != PACKET_MARKER_SIZE:
-        stream = f.read(1)
-        buf_packet.append(stream)
-        buf_message.append(stream)
+    while len(set(buf)) != PACKET_MARKER_SIZE:
+        buf = buf[1:]
+        buf.fromfile(f, 1)
     start_packet = f.tell()
 
-    while len(set(buf_message)) != MESSAGE_MARKER_SIZE:
-        buf_message.append(f.read(1))
+    buf.fromfile(f, MESSAGE_MARKER_SIZE-PACKET_MARKER_SIZE)
+
+    while len(set(buf)) != MESSAGE_MARKER_SIZE:
+        buf = buf[1:]
+        buf.fromfile(f, 1)
     start_message = f.tell()
 
 print("ANSWER:",
