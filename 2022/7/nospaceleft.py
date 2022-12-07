@@ -16,7 +16,7 @@ class Item:
         if size is None:
             self.children = {}
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self.size is not None:
             return self.size
         size = 0
@@ -24,16 +24,16 @@ class Item:
             size += len(self.children[child])
         return size
 
-    def __contains__(self, filename):
-        return filename in self.children
+    def __contains__(self, itemname: str) -> bool:
+        return itemname in self.children
 
-    def __getitem__(self, val):
-        return self.children[val]
+    def __getitem__(self, itemname: str) -> bool:
+        return self.children[itemname]
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         return len(self) < len(other)
 
-    def __str__(self):
+    def __str__(self) -> str:
         res = self.name
         parent = self.parent
         while parent is not None:
@@ -41,7 +41,7 @@ class Item:
             parent = parent.parent
         return res
 
-    def add(self, file):
+    def add(self, file) -> None:
         self.children[file.name] = file
 
 
@@ -82,11 +82,7 @@ for directory in directories:
     if left_to_free <= len_dir < len(dir_to_delete):
         dir_to_delete = directory
 
-
-print(f"{unused_space=}\n{left_to_free=}, ")
-
 print("ANSWER:",
       f"Part 1: {sum_part1}",
-      f"Part 2: {len(dir_to_delete)} ({dir_to_delete})",
+      f"Part 2: {len(dir_to_delete)} (rm {dir_to_delete})",
       sep='\n')
-
