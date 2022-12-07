@@ -2,6 +2,8 @@ import sys
 
 
 INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
+TOTAL_DISK_SPACE = 70_000_000
+NEED_FREE_SPACE = 30_000_000
 
 
 class Item:
@@ -37,7 +39,7 @@ class Item:
         while parent is not None:
             res = f"{parent.name if parent.name != '/' else ''}/{res}"
             parent = parent.parent
-        return f"{len(self)}\t{res}"
+        return res
 
     def add(self, file):
         self.children[file.name] = file
@@ -69,14 +71,22 @@ with open(INPUT_FILE, 'r') as f:
                 working_dir.add(dir_)
                 directories.add(dir_)
 
+unused_space = TOTAL_DISK_SPACE - len(root)
+left_to_free = NEED_FREE_SPACE - unused_space
+dir_to_delete = root
 sum_part1 = 0
-for directory in sorted(directories):
+for directory in directories:
     len_dir = len(directory)
     if len_dir <= 100000:
         sum_part1 += len_dir
+    if left_to_free <= len_dir < len(dir_to_delete):
+        dir_to_delete = directory
+
+
+print(f"{unused_space=}\n{left_to_free=}, ")
 
 print("ANSWER:",
       f"Part 1: {sum_part1}",
-      f"Part 2:",
+      f"Part 2: {len(dir_to_delete)} ({dir_to_delete})",
       sep='\n')
 
