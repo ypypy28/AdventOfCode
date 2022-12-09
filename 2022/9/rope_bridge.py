@@ -20,22 +20,40 @@ class Knot:
         self.x = x
         self.y = y
         self.history = [(x, y)]
+        self.tail = None
 
     def move(self, direction: str) -> None:
         dx, dy = DIRECTIONS[direction]
         self.x += dx
         self.y += dy
         self.history.append((self.x, self.y))
+        if self.tail is not None:
+            self.tail.move(self.x, self.y)
+
+    def add_tail(self, new_tail) -> None:
+        if not self.tail:
+            self.tail = new_tail
+            return
+        old_tail = self.tail
+        while old_tail.tail is not None:
+            old_tail = old_tail.tail
+        old_tail.add_tail(new_tail)
+
+    def __getitem__(self, i: int):
+        knot = self
+        for _ in range(i):
+            knot = knot.tail
+            if knot is None:
+                raise IndexError
+        return knot
 
 
 class Tail(Knot):
-    def __init__(self, head: Knot, x=0, y=0):
+    def __init__(self, x=0, y=0):
         super().__init__(x, y)
-        self.__head = head
 
-    def move(self) -> None:
-        dx = self.__head.x - self.x
-        dy = self.__head.y - self.y
+    def move(self, head_x: int, head_y: int) -> None:
+        dx, dy = head_x - self.x, head_y - self.y
         if abs(dx) < 2 and abs(dy) < 2:
             return
 
@@ -49,7 +67,8 @@ class Tail(Knot):
 def solve() -> int:
 
     head = Knot()
-    tail = Tail(head)
+    for _ in range(9):
+        head.add_tail(Tail())
 
     with open(filename, 'r') as f:
         for line in f:
@@ -58,13 +77,15 @@ def solve() -> int:
 
             for _ in range(repeats):
                 head.move(direction)
-                tail.move()
 
-        return len(set(tail.history))
+        first_tail, last_tail = head[1], head[9]
+
+        return len(set(first_tail.history)), len(set(last_tail.history))
 
 
 if __name__ == "__main__":
-    part1 = solve()
+    part1, part2 = solve()
     print("ANSWER:",
           f"Part 1: {part1}",
+          f"Part 2: {part2}",
           sep='\n')
