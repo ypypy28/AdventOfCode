@@ -92,7 +92,7 @@ public class Main {
 
         }
 
-        System.out.printf("ANSWER:\nPart 1: %d\nPart 2: %d (%s)", sumPart1, dirToDeleteSize, dirToDelete.fullPath());
+        System.out.printf("ANSWER:\nPart 1: %d\nPart 2: %d (rm %s)", sumPart1, dirToDeleteSize, dirToDelete.fullPath());
 
     }
 }
