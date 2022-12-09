@@ -8,6 +8,7 @@ with open(filename, 'r') as f:
         buf.append([int(ch) for ch in line.rstrip()])
 
 all_edges = len(buf)*2 + (len(buf[0])-2)*2
+best_tree = None
 max_score = 0
 visible = 0
 for x in range(1, len(buf[1])-1):
@@ -57,9 +58,11 @@ for x in range(1, len(buf[1])-1):
 
             if score > max_score:
                 max_score = score
+                best_tree = (x, y, buf[y][x])
 
 
 print("ASNWER:",
       f"Part 1: {visible + all_edges}",
-      f"Part 2: {max_score}",
+      "Part 2: %d (Best tree is located at (x=%d, y=%d) with size %d)"
+      % (max_score, *best_tree),
       sep='\n')
