@@ -14,7 +14,7 @@ public class Main {
 
     public static FsDirectory getRoot() {
         FsDirectory root = new FsDirectory("/", null);
-        FsDirectory working_dir = root;
+        FsDirectory workingDir = root;
 
         File file = new File(Main.INPUT_FILE);
         try {
@@ -24,13 +24,13 @@ public class Main {
 
                 if (line.startsWith("$")) {
                     if (line.equals("$ cd ..")) {
-                        working_dir = working_dir.parent;
+                        workingDir = workingDir.parent;
                     } else if (line.equals("$ cd /")) {
-                        working_dir = root;
+                        workingDir = root;
                     } else if (line.startsWith("$ cd")) {
                         String[] args = line.split(" ");
-                        if (working_dir.children.containsKey(args[2])) {
-                            working_dir = (FsDirectory) working_dir.getChild(args[2]);
+                        if (workingDir.children.containsKey(args[2])) {
+                            workingDir = (FsDirectory) workingDir.getChild(args[2]);
                         }
                     }
                     continue;
@@ -41,12 +41,12 @@ public class Main {
                 try {
                     int size = Integer.parseInt(args[0]);
                     String filename = args[1];
-                    FsFile new_file = new FsFile(filename, size);
-                    working_dir.children.put(filename, new_file);
+                    FsFile newFile = new FsFile(filename, size, workingDir);
+                    workingDir.children.put(filename, newFile);
                 } catch (NumberFormatException e) {
-                    if (args[0].equals("dir") && !working_dir.hasChild(args[1])) {
-                        FsDirectory new_dir = new FsDirectory(args[1], working_dir);
-                        working_dir.addChild(args[1], new_dir);
+                    if (args[0].equals("dir") && !workingDir.hasChild(args[1])) {
+                        FsDirectory new_dir = new FsDirectory(args[1], workingDir);
+                        workingDir.addChild(args[1], new_dir);
                     }
                 }
             }
