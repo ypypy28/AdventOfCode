@@ -10,6 +10,8 @@ class Register:
         self.cycle = 1
         self._ths = ths
         self._part1 = {}
+        self.sprite_size = 3
+        self.crt_width = 40
 
     def process(self, command):
         match command.split():
@@ -22,11 +24,9 @@ class Register:
                 raise NotImplemented
 
     def cycle_inc(self):
-        check_i = len(self._part1)-len(self._ths)
-        if check_i < 1:
-            check_cycle = self._ths[check_i]
-            if self.cycle == check_cycle:
-                self._part1[check_cycle] = self.strenth()
+        self.produce_pixel()
+        if self.cycle in self._ths:
+            self._part1[self.cycle] = self.strenth()
         self.cycle += 1
 
     def noop(self):
@@ -40,12 +40,20 @@ class Register:
     def strenth(self):
         return self.cycle * self.val
 
+    def produce_pixel(self):
+        x = (self.cycle-1) % self.crt_width
+        draw_sign = '#' if abs(self.val-x) < self.sprite_size-1 else '.'
+        sys.stdout.write(draw_sign)
+        sys.stdout.flush()
+        if x == self.crt_width-1:
+            sys.stdout.write('\n')
+
 
 V = Register((20, 60, 100, 140, 180, 220))
 with open(filename, 'r') as f:
     for line in f:
         V.process(line.rstrip())
 
-print("ANSWER",
+print("\nANSWER",
       f"Part 1: {sum(V._part1.values())}",
       sep='\n')
