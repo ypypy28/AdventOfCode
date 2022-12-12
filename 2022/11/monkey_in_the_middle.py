@@ -1,36 +1,32 @@
-import operator
+import math
 import sys
 import typing
 from heapq import nlargest
 
 
-filename = sys.argv[1] if len(sys.argv) > 1 else "test_input.txt"
+filename = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 
 
 class Monkey:
     def __init__(
         self, starting_items: list[int],
         operation: typing.Callable,
-        test: typing.Callable,
+        test: tuple[int, int, int],
         can_calm: bool = True
     ) -> None:
         self.inspections = 0
         self.items = starting_items
         self.op = operation
-        self.test = test
-        if can_calm:
-            self.calm = lambda val: val // 3
-        else:
-            self.calm = lambda val: val
+        self.divisor, *self._not_ok_or_ok = test
+        self.can_calm = can_calm
 
-    def round(self, monkeys: list["Monkey"]) -> None:
+    def round(self, monkeys: list["Monkey"], LCM_DIV: int) -> None:
+        self.inspections += len(self.items)
         for item in self.items:
-            self.inspections += 1
-            item = self.op(item)
-            item = self.calm(item)
-            next_monkey_id = self.test(item)
+            item = self.op(item) % LCM_DIV
+            item //= 3 if self.can_calm else 1
+            next_monkey_id = self._not_ok_or_ok[item % self.divisor == 0]
             monkeys[next_monkey_id].receive(item)
-
         self.items.clear()
 
     def receive(self, item: int) -> None:
@@ -50,35 +46,41 @@ def read_monkey(file: typing.TextIO) -> list[str]:
 def parse_operation(example: str) -> typing.Callable:
     arg1, op, arg2 = example.partition('=')[2].split()
 
-    match op:
-        case '+':
-            op = operator.add
-        case '-':
-            op = operator.sub
-        case '*':
-            op = operator.mul
+    operation: typing.Callable[[int], int]
+    match op, arg1, arg2:
+        case '+', "old", "old":
+            def operation(old: int) -> int:
+                return old + old
+        case '+', "old", n:
+            num = int(n)
+            def operation(old: int) -> int:
+                return old + num
+        case '-', "old", "old":
+            def operation(old: int) -> int:
+                return 0
+        case '-', "old", n:
+            num = int(n)
+            def operation(old: int) -> int:
+                return old - num
+        case '*', "old", "old":
+            def operation(old: int) -> int:
+                return old * old
+        case '*', "old", n:
+            num = int(n)
+            def operation(old: int) -> int:
+                return old * num
         case _:
             raise NotImplementedError
 
-    match arg1, arg2:
-        case "old", "old":
-            return lambda old: op(old, old)
-        case "old", num:
-            num = int(num)
-            return lambda old: op(old, num)
-        case _:
-            raise ValueError(f"bad args {arg1=}, {arg2=} {example=}")
+    return operation
 
 
-def parse_test(example: list[str]) -> typing.Callable:
+def parse_test(example: list[str]) -> tuple[int, int, int]:
     if "divisible" not in example[0]:
         raise NotImplementedError
 
-    divisor, ok, not_ok = (int(line.rpartition(' ')[2]) for line in example)
-
-    def test(val):
-        return ok if val % divisor == 0 else not_ok
-    return test
+    divisor, ok, not_ok = tuple(int(line.rpartition(' ')[2]) for line in example)
+    return divisor, not_ok, ok
 
 
 def create_monkey(monkey_data: list[str], can_calm: bool):
@@ -100,15 +102,16 @@ def play(rounds: int, can_calm: bool=True) -> int:
             monkeys.append(create_monkey(monkey_data, can_calm))
             monkey_data = read_monkey(f)
 
-    interesting_rounds = {20, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000}
+    LCM_DIV = math.lcm(*(monkey.divisor for monkey in monkeys))
 
-    for i in range(rounds):
+    interesting_rounds = {20, 1000, 2000, 3000, 4000,
+                          5000, 6000, 7000, 8000, 9000, 10000}
+
+    for i in range(1, rounds+1):
         for monkey in monkeys:
-            monkey.round(monkeys)
-        if i+1 in interesting_rounds:
-            show_state(i+1, can_calm, monkeys)
-
-
+            monkey.round(monkeys, LCM_DIV)
+        if i in interesting_rounds:
+            show_state(i, can_calm, monkeys)
 
     two_largest = nlargest(2, monkeys, key=lambda m: m.inspections)
     return two_largest[0].inspections * two_largest[1].inspections
@@ -116,14 +119,16 @@ def play(rounds: int, can_calm: bool=True) -> int:
 
 def show_state(round: int, can_calm: bool, monkeys: list[Monkey]) -> None:
     print(
-        f"\n== After round {round} == ({can_calm=})",
+        f"== After round {round} == ({can_calm=})",
         *(f"Monkey {i} inspected items {m.inspections} times."
           for i, m in enumerate(monkeys)),
-        sep='\n'
+        sep='\n',
+        end='\n\n'
     )
 
 
 def solve() -> tuple[int, int]:
+    # return play(rounds=20), play(rounds=10000, can_calm=False)
     return play(rounds=20), play(rounds=10000, can_calm=False)
 
 
