@@ -1,5 +1,7 @@
 import sys
 import typing
+from collections import namedtuple, deque
+from functools import cache
 from time import sleep
 
 
@@ -12,6 +14,23 @@ MOVEMENTS = {
     (1, 0): '>',
     (-1, 0): '<',
 }
+Variant = namedtuple("Variant", "distance path")
+
+
+def path_to_movements(path: tuple[tuple[int, int]]
+                      ) -> typing.Generator[str, None, None]:
+    prev = path[0]
+    for i in range(1, len(path)):
+        cur = path[i]
+        move = cur[0] - prev[0], cur[1] - prev[1]
+        yield MOVEMENTS[move]
+        prev = cur
+
+    yield 'E'
+
+@cache
+def calculate_distance(from_: tuple[int, int], to_: tuple[int, int]) -> float:
+    return ((from_[0] - to_[0])**2 + (from_[1] - to_[1])**2)**.5
 
 
 def parse_input(
@@ -37,75 +56,54 @@ def parse_input(
 
 def solve():
     field_a, start, end = parse_input(filename)
-    field_b = [[ch for ch in line] for line in field_a]
     field = [[ord(ch) - ord('a') for ch in line] for line in field_a]
 
-    cur = start
-    walked = [cur]
-    bad_walked = dict()
-    dist, steps, new_end = 999, 0, end
-    while cur != end:
-        sleep(.1)
-        x, y = cur
+    walked = set()
+    S = Variant(calculate_distance(start, end), (start,))
+    closest_variant = S
+    queue = deque((S,))
+    while queue:
+        cur = queue.popleft()
+        if cur.distance == 0:
+            closest_variant = cur
+            break
 
-        next_ = [(
-            (new_x, new_y),
-            ((new_y-end[1])**2 + (new_x - end[0])**2)**.5,
-            (dx, dy),
+        x, y = cur.path[-1]
+        walked.add((x, y))
+
+        next_ = [Variant(
+            calculate_distance(new_coords, end),
+            tuple((*cur.path, new_coords)),
         ) for dx, dy in MOVEMENTS.keys()
             if (
                 (-1 < (new_x:=x+dx) < len(field[y]))
                 and (-1 < (new_y:=y+dy) < len(field))
-                and ((new_x, new_y) not in walked)
-                and (
-                    (step:=len(walked)) not in bad_walked
-                    # (x, y) not in bad_walked
-                    or ((new_x, new_y) not in bad_walked[step]))
-                    # or ((new_x, new_y) not in bad_walked[(x, y)]))
+                and ((new_coords:=(new_x, new_y)) not in walked)
                 and ((field[new_y][new_x] - field[y][x]) in (-1, 0, 1))
             )]
 
         # make closes point new end if we cannot reach the end
-        if not next_ and len(walked)==1:
-            print("NEW END!>>>>>>>>>>>>>>>>>>>>>>>>>")
-            sleep(5)
-            cur = start
-            end = new_end
-            field_a = [[ch for ch in line] for line in field_b]
-            walked = [cur]
-        elif not next_:
-            print(f"BAD step: {cur=} min_dist={dist} min_steps={steps} {field_a[y][x]=}")
-            prev = walked.pop()
-            cur_step = len(walked)
-            bad_walked[cur_step] = bad_walked.get(cur_step, set())
-            # bad_walked[prev] = bad_walked.get(prev, set())
-            bad_walked[cur_step].add(cur)
-            # bad_walked[prev].add(cur)
-            cur = walked[-1]
-            if field_a[cur[1]][cur[0]] in MOVEMENTS.values():
-                field_a[cur[1]][cur[0]] = chr(field[cur[1]][cur[0]] + ord('a'))
+        if not next_:
+            print(f"step={len(cur.path)-1}", end='\r')
+            if cur.distance < closest_variant.distance:
+                closest_variant = cur
+                show_field(field_a, cur.path)
         else:
-            next_.sort(key=lambda x: x[1])
-            field_a[y][x] = MOVEMENTS[next_[0][2]]
-            if next_[0][1] < dist:
-                dist = next_[0][1]
-                steps = len(walked)-1
-                new_end = cur
-            elif next_[0][1] == dist and len(walked)-1 < steps:
-                steps = len(walked)-1
-                new_end = cur
-            cur = next_[0][0]
-            walked.append(cur)
-            print(f"{walked=}")
-            print(f"{bad_walked=}\nstep: {cur=} dist:{next_[0][1]} {len(walked)-1=} {field_a[y][x]=}")
-            print(f"{next_=}")
-        show_field(field_a)
+            # next_.sort(key=lambda v: v.distance)
+            queue.extend(next_)
 
-    return steps
 
-def show_field(field: list[list[str]]) -> None:
-    print(*(''.join(line) for line in field),
-          sep='\n')
+    show_field(field_a, cur.path)
+    return len(closest_variant.path) - 1
+
+
+def show_field(field: list[list[str]], path: tuple[tuple[int, int]]) -> None:
+    movements = path_to_movements(path)
+    pd = dict(zip(path, movements))
+    res = '\n'.join(''.join((ch if (coords:=(x, y)) not in pd else pd[coords])
+                           for x, ch in enumerate(line))
+                    for y, line in enumerate(field))
+    print(f"\n{res}", end='\n')
 
 
 if __name__ == "__main__":
