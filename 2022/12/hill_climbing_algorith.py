@@ -58,10 +58,10 @@ def solve():
                 and (-1 < (new_y:=y+dy) < len(field))
                 and ((new_x, new_y) not in walked)
                 and (
-                    # (step:=len(walked)-1) not in bad_walked
-                    (x, y) not in bad_walked
-                    # or ((new_x, new_y) not in bad_walked[step]))
-                    or ((new_x, new_y) not in bad_walked[(x, y)]))
+                    (step:=len(walked)) not in bad_walked
+                    # (x, y) not in bad_walked
+                    or ((new_x, new_y) not in bad_walked[step]))
+                    # or ((new_x, new_y) not in bad_walked[(x, y)]))
                 and ((field[new_y][new_x] - field[y][x]) in (-1, 0, 1))
             )]
 
@@ -74,21 +74,19 @@ def solve():
             field_a = [[ch for ch in line] for line in field_b]
             walked = [cur]
         elif not next_:
-            print(f"BAD step: {cur=} {dist=} {steps=} {field_a[y][x]=}")
+            print(f"BAD step: {cur=} min_dist={dist} min_steps={steps} {field_a[y][x]=}")
             prev = walked.pop()
-            prev_step = len(walked)-1
-            # bad_walked[prev_step] = bad_walked.get(prev_step, set())
-            bad_walked[prev] = bad_walked.get(prev, set())
-            # bad_walked[prev_step].add(cur)
-            bad_walked[prev].add(cur)
+            cur_step = len(walked)
+            bad_walked[cur_step] = bad_walked.get(cur_step, set())
+            # bad_walked[prev] = bad_walked.get(prev, set())
+            bad_walked[cur_step].add(cur)
+            # bad_walked[prev].add(cur)
             cur = walked[-1]
             if field_a[cur[1]][cur[0]] in MOVEMENTS.values():
                 field_a[cur[1]][cur[0]] = chr(field[cur[1]][cur[0]] + ord('a'))
         else:
             next_.sort(key=lambda x: x[1])
-            print(f"{next_=}")
             field_a[y][x] = MOVEMENTS[next_[0][2]]
-            walked.append(cur)
             if next_[0][1] < dist:
                 dist = next_[0][1]
                 steps = len(walked)-1
@@ -97,7 +95,10 @@ def solve():
                 steps = len(walked)-1
                 new_end = cur
             cur = next_[0][0]
-            print(f"step: {cur=} dist:{next_[0][1]} {len(walked)-1=} {field_a[y][x]=} {bad_walked=}")
+            walked.append(cur)
+            print(f"{walked=}")
+            print(f"{bad_walked=}\nstep: {cur=} dist:{next_[0][1]} {len(walked)-1=} {field_a[y][x]=}")
+            print(f"{next_=}")
         show_field(field_a)
 
     return steps
