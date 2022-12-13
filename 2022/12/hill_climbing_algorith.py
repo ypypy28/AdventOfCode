@@ -4,7 +4,7 @@ from collections import namedtuple, deque
 from functools import cache
 
 
-filename = sys.argv[1] if len(sys.argv) > 1 else "test_input.txt"
+filename = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 
 
 MOVEMENTS = {
