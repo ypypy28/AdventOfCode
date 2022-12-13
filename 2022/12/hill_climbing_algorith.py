@@ -35,31 +35,31 @@ def calculate_distance(from_: tuple[int, int], to_: tuple[int, int]) -> float:
 
 
 def parse_input(
-    filepath: typing.TextIO
-) -> tuple[list[list[int]], tuple[int, int], tuple[int, int], list[tuple[int, int]]]:
+    filepath: typing.TextIO,
+) -> tuple[list[list[str]], tuple[int, int], tuple[int, int], list[tuple[int, int]]]:
     start = (0, 0)
     end = (0, 0)
     part2_starts = []
-    field: list[list[int]] = []
-    with open(filename, 'r') as f:
-        for j, line in enumerate(f):
-            field.append([])
-            line = line.rstrip()
-            for i, ch in enumerate(line):
-                if ch == 'S':
-                    ch = 'a'
-                    start = (i, j)
-                elif ch == 'E':
-                    ch = 'z'
-                    end = (i, j)
-                elif ch == 'a':
-                    part2_starts.append((i, j))
-                field[-1].append(ch)
+    field: list[list[str]] = []
+    for j, line in enumerate(filepath):
+        field.append([])
+        line = line.rstrip()
+        for i, ch in enumerate(line):
+            if ch == 'S':
+                ch = 'a'
+                start = (i, j)
+            elif ch == 'E':
+                ch = 'z'
+                end = (i, j)
+            elif ch == 'a':
+                part2_starts.append((i, j))
+            field[-1].append(ch)
     return field, start, end, part2_starts
 
 
-def solve() -> tuple[int, int]:
-    field_a, start, end, part2_starts = parse_input(filename)
+def solve(filename: str) -> tuple[int, int]:
+    with open(filename, 'r') as f:
+        field_a, start, end, part2_starts = parse_input(f)
     field = [[ord(ch) - ord('a') for ch in line] for line in field_a]
 
     part1Variant = bfs(field, start, end)
@@ -124,7 +124,7 @@ def show_field(field: list[list[str]], path: tuple[tuple[int, int]]) -> None:
 
 
 if __name__ == "__main__":
-    part1, part2 = solve()
+    part1, part2 = solve(filename)
     print("ANSWER:",
           f"Part 1: {part1}",
           f"Part 2: {part2}",
