@@ -1,7 +1,6 @@
 import sys
 import typing
 from collections import namedtuple, deque
-from functools import cache
 from time import sleep
 
 
@@ -28,10 +27,15 @@ def path_to_movements(path: tuple[tuple[int, int]]
 
     yield 'E'
 
-@cache
-def calculate_distance(from_: tuple[int, int], to_: tuple[int, int]) -> float:
-    return ((from_[0] - to_[0])**2 + (from_[1] - to_[1])**2)**.5
+# def calculate_distance(from_: tuple[int, int], to_: tuple[int, int], field) -> float:
+#     return ((from_[0] - to_[0])**2
+#             + (from_[1] - to_[1])**2
+#             + (field[from_[1]][from_[0]] - field[to_[1]][to_[0]])**2)**.5
 
+
+def calculate_distance(from_: tuple[int, int], to_: tuple[int, int]) -> float:
+    return ((from_[0] - to_[0])**2
+            + (from_[1] - to_[1])**2)**.5
 
 def parse_input(
     filepath: typing.TextIO
@@ -59,19 +63,25 @@ def solve():
     field = [[ord(ch) - ord('a') for ch in line] for line in field_a]
 
     walked = set((start,))
+    # S = Variant(calculate_distance(start, end, field), (start,))
     S = Variant(calculate_distance(start, end), (start,))
     closest_variant = S
     queue = deque((S,))
     while queue:
         cur = queue.popleft()
-        if cur.distance == 0:
+        # print(f"\nstep={len(cur.path)-1} {cur.distance=}", end='')
+        # show_field(field_a, cur.path)
+        if cur.distance < closest_variant.distance:
             closest_variant = cur
-            break
+            # print(f"\nstep={len(cur.path)-1} {cur.distance=}", end='')
+            # show_field(field_a, cur.path)
+            if cur.distance == 0:
+                break
 
         x, y = cur.path[-1]
-        # walked.add((x, y))
 
         next_ = [Variant(
+            # calculate_distance(new_coords, end, field),
             calculate_distance(new_coords, end),
             tuple((*cur.path, new_coords)),
         ) for dx, dy in MOVEMENTS.keys()
@@ -79,16 +89,11 @@ def solve():
                 (-1 < (new_x:=x+dx) < len(field[y]))
                 and (-1 < (new_y:=y+dy) < len(field))
                 and ((new_coords:=(new_x, new_y)) not in walked)
-                and ((field[new_y][new_x] - field[y][x]) in (-1, 0, 1))
+                and ((field[new_y][new_x] - field[y][x]) <= 1) # (-1, 0, 1))
             )]
 
         # make closes point new end if we cannot reach the end
-        if not next_:
-            if cur.distance < closest_variant.distance:
-                print(f"step={len(cur.path)-1} {cur.distance=}", end='\r')
-                closest_variant = cur
-                show_field(field_a, cur.path)
-        else:
+        if next_:
             # next_.sort(key=lambda v: v.distance)
             for v in next_:
                 walked.add(v.path[-1])
@@ -96,7 +101,7 @@ def solve():
 
 
     show_field(field_a, closest_variant.path)
-    print(f"step={len(closest_variant.path)-1} {closest_variant.distance=}", end='\r')
+    print(f"step={len(closest_variant.path)-1} {closest_variant.distance=}")
     return len(closest_variant.path) - 1
 
 
