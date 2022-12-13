@@ -58,7 +58,7 @@ def solve():
     field_a, start, end = parse_input(filename)
     field = [[ord(ch) - ord('a') for ch in line] for line in field_a]
 
-    walked = set()
+    walked = set((start,))
     S = Variant(calculate_distance(start, end), (start,))
     closest_variant = S
     queue = deque((S,))
@@ -69,7 +69,7 @@ def solve():
             break
 
         x, y = cur.path[-1]
-        walked.add((x, y))
+        # walked.add((x, y))
 
         next_ = [Variant(
             calculate_distance(new_coords, end),
@@ -84,16 +84,19 @@ def solve():
 
         # make closes point new end if we cannot reach the end
         if not next_:
-            print(f"step={len(cur.path)-1}", end='\r')
             if cur.distance < closest_variant.distance:
+                print(f"step={len(cur.path)-1} {cur.distance=}", end='\r')
                 closest_variant = cur
                 show_field(field_a, cur.path)
         else:
             # next_.sort(key=lambda v: v.distance)
+            for v in next_:
+                walked.add(v.path[-1])
             queue.extend(next_)
 
 
-    show_field(field_a, cur.path)
+    show_field(field_a, closest_variant.path)
+    print(f"step={len(closest_variant.path)-1} {closest_variant.distance=}", end='\r')
     return len(closest_variant.path) - 1
 
 
