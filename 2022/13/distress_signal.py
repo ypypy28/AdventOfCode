@@ -1,7 +1,5 @@
 import sys
 import typing
-from itertools import zip_longest
-
 
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 DIVIDER_PACKETS = ([[2]], [[6]])
@@ -18,7 +16,7 @@ class PairIterator:
     def __next__(self) -> tuple[Packet]:
         if self.__f.closed:
             raise StopIteration
-        pair: tuple[Packet] =  tuple(eval(self.__f.readline()) for _ in range(2))
+        pair: tuple[Packet] = tuple(eval(self.__f.readline()) for _ in range(2))
         end = self.__f.readline()
         if end == '':
             self.__f.close()
@@ -58,6 +56,7 @@ def is_sorted(pair: tuple[Packet]) -> bool:
         case _:
             raise NotImplementedError
 
+
 def reordered(pairs: list[Packet]) -> list[Packet]:
     res = []
     while pairs:
@@ -78,7 +77,6 @@ def solve(filename):
 
     # Part 2
     pairs = [*DIVIDER_PACKETS] + [p for pair in PairIterator(filename) for p in pair]
-    max_len_pair = max(pairs, key=len)
     pairs = reordered(pairs)
     d1, d2 = (pairs.index(divider)+1 for divider in DIVIDER_PACKETS)
     part2 = d1 * d2
