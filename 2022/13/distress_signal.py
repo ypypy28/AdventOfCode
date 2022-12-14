@@ -4,7 +4,7 @@ from itertools import zip_longest
 
 
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-
+DIVIDER_PACKETS = ([[2]], [[6]])
 Packet = typing.Union[list[int], list['Packet']]
 
 
@@ -58,24 +58,38 @@ def is_sorted(pair: tuple[Packet]) -> bool:
         case _:
             raise NotImplementedError
 
+def reordered(pairs: list[Packet]) -> list[Packet]:
+    res = []
+    while pairs:
+        min_ = pairs[0]
+        for packet in pairs[1:]:
+            if is_sorted((packet, min_)):
+                min_ = packet
+        res.append(min_)
+        pairs.remove(min_)
+    return res
+
 
 def solve(filename):
-
     sum_of_indices = 0
     for i, pair in enumerate(PairIterator(filename), start=1):
-        print(f"\nPAIR {i} {pair=}",
-              '\n\n'.join(f"\t(L):{p1}\n\t(R):{p2}"
-                          for p1, p2 in zip_longest(*pair)))
         if is_sorted(pair):
-            print(f"Correct {i}")
             sum_of_indices += i
 
-    return sum_of_indices, 0
+    # Part 2
+    pairs = [*DIVIDER_PACKETS] + [p for pair in PairIterator(filename) for p in pair]
+    max_len_pair = max(pairs, key=len)
+    pairs = reordered(pairs)
+    d1, d2 = (pairs.index(divider)+1 for divider in DIVIDER_PACKETS)
+    part2 = d1 * d2
+
+    return sum_of_indices, part2
 
 
 if __name__ == "__main__":
-    part1, _ = solve(FILENAME)
+    part1, part2 = solve(FILENAME)
 
     print("ANSWER",
           f"Part 1: {part1}",
+          f"Part 2: {part2}",
           sep='\n')
