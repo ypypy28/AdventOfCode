@@ -3,7 +3,7 @@ import typing
 from itertools import zip_longest
 
 
-FILENAME = sys.argv[1] if len(sys.argv) > 1 else "test_input.txt"
+FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 
 
 class PairIterator:
@@ -24,55 +24,48 @@ class PairIterator:
 
 
 def is_sorted(pair: tuple[list[int | list[int]]]) -> bool:
-    smaller = False
-    for a, b in zip_longest(*pair):
-        match a, b:
-            case int(), int():
-                if b < a:
-                    print(f"-> {pair=} - False, because {a=} > {b=} list")
-                    return False
-                elif a < b:
-                    smaller = True
+    a, b = pair
+    match a, b:
+        case int(), int():
+            return a < b
 
-            case int(), None:
-                print(f"-> {pair=} - {smaller}, because {a=} int {b=}")
-                return smaller
-                # print(f"{pair=} - False, because {a=} int {b=}")
-                # return False
+        case int(), None:
+            return False
 
-            case list(), None:
-                print(f"-> {pair=} - False, because {a=} int {b=}")
-                return False
+        case None, int() | list():
+            return True
 
-            case None, int() | list():
-                print(f"-> {pair=} - True, because {a=} int {b=}")
-                return True
-                # print(f"{pair=} - {smaller}, because {a=} int {b=}")
-                # return smaller
+        case list(), None:
+            return False
 
-            case list(), list():
-                if not is_sorted((a, b)):
+        case int(), list():
+            return is_sorted(([a], b))
+
+        case list(), int():
+            return is_sorted((a, [b]))
+
+        case list(), list():
+            for l, r in zip(a, b):
+                if is_sorted((l, r)):
+                    return True
+                elif is_sorted((r, l)):  # elif not equal (l > r)
                     return False
 
-            case int(), list():
-                if not is_sorted(([a], b)):
-                    return False
+            return len(a) < len(b)
 
-            case list(), int():
-                if not is_sorted((a, [b])):
-                    return False
-            case _:
-                continue
-    return True
+        case _:
+            raise NotImplementedError
 
 
 def solve(filename):
 
     sum_of_indices = 0
     for i, pair in enumerate(PairIterator(filename), start=1):
-        print(f"\nPAIR {i} {pair}")
+        print(f"\nPAIR {i} {pair=}",
+              '\n\n'.join(f"\t(L):{p1}\n\t(R):{p2}"
+                          for p1, p2 in zip_longest(*pair)))
         if is_sorted(pair):
-            print(f"Correct {i} {pair=}")
+            print(f"Correct {i}")
             sum_of_indices += i
 
     return sum_of_indices, 0
