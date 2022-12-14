@@ -5,6 +5,8 @@ from itertools import zip_longest
 
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 
+Packet = typing.Union[list[int], list['Packet']]
+
 
 class PairIterator:
     def __init__(self, filename: str):
@@ -13,17 +15,17 @@ class PairIterator:
     def __iter__(self):
         return self
 
-    def __next__(self) -> tuple[list[int | list[int]]]:
+    def __next__(self) -> tuple[Packet]:
         if self.__f.closed:
             raise StopIteration
-        pair =  tuple(eval(self.__f.readline()) for _ in range(2))
+        pair: tuple[Packet] =  tuple(eval(self.__f.readline()) for _ in range(2))
         end = self.__f.readline()
         if end == '':
             self.__f.close()
         return pair
 
 
-def is_sorted(pair: tuple[list[int | list[int]]]) -> bool:
+def is_sorted(pair: tuple[Packet]) -> bool:
     a, b = pair
     match a, b:
         case int(), int():
