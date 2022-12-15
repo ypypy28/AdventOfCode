@@ -3,8 +3,12 @@ from itertools import repeat
 from time import sleep
 
 
-FILENAME = sys.argv[1] if len(sys.argv) > 1 else "test_input.txt"
+# FILENAME = sys.argv[1] if len(sys.argv) > 1 else "test_input.txt"
+FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 SIGN = {'empty': '.', 'rock': '#', 'sand': 'o', 'start': '+'}
+SCREEN_HEIGHT = 50
+QUARTER_SCREEN = SCREEN_HEIGHT >> 2
+THREE_QUARTERS = SCREEN_HEIGHT - QUARTER_SCREEN
 
 
 class Sand:
@@ -39,20 +43,20 @@ class Sand:
 
 def get_rocks(filename: str) -> list[tuple[int, int]]:
     rocks: list[tuple[int, int]] = []
-    paths = 0
     with open(FILENAME, 'r') as f:
         for line in f:
             points = [tuple(int(c) for c in p.split(',')) for p in line.split(' -> ')]
-            paths += 1
             points_iter = iter(points)
             prev = next(points_iter)
             for cur in points_iter:
                 if prev[0] == cur[0]:
                     min_, max_ = ((cur[1], prev[1]), (prev[1], cur[1]))[prev[1] < cur[1]]
-                    rocks.extend((zip(repeat(cur[0]), range(min_, max_+1))))
+                    line = tuple(zip(repeat(cur[0]), range(min_, max_+1)))
+                    rocks.extend(line)
                 else:
-                    min_, max_ = ((cur[0], prev[0]), (prev[0], cur[0]))[prev[1] < cur[1]]
-                    rocks.extend((zip(range(min_, max_+1), repeat(cur[1]))))
+                    min_, max_ = ((cur[0], prev[0]), (prev[0], cur[0]))[prev[0] < cur[0]]
+                    line = tuple(zip(range(min_, max_+1), repeat(cur[1])))
+                    rocks.extend(line)
                 prev = cur
     return rocks
 
@@ -74,7 +78,7 @@ def solve(filename: str) -> tuple[int, int]:
     sand_count = 0
     while True:
         new_sand = Sand(sand_start_position, field)
-        show_field(field)
+        # show_field(field)
         try:
             while new_sand.step_down():
                 show_field(field, new_sand)
@@ -82,22 +86,27 @@ def solve(filename: str) -> tuple[int, int]:
             print("The end:", e)
             break
         sand_count += 1
-        sleep(1)
+        sleep(.2)
 
     return sand_count, None
 
 
 def show_field(field: list[list[str | Sand]], sand: Sand = None) -> None:
     start, stop = 0, len(field)
-    if stop > 40 and sand:
-        start, stop = max(0, sand.y-20), min(stop, sand.y+20)
+    if stop > SCREEN_HEIGHT:
+        # half = SCREEN_HEIGHT >> 1
+        if sand:
+            start = max(0, sand.y-THREE_QUARTERS)
+            stop = max(SCREEN_HEIGHT, sand.y+QUARTER_SCREEN)
+        else:
+            stop = SCREEN_HEIGHT
 
     print('\033[2J\033[H',
           '\n'.join(''.join(str(field[start+y][x])
                             for x, _ in enumerate(line))
                     for y, line in enumerate(field[start:stop])),
           sep='')
-    sleep(.05)
+    sleep(.01)
 
 
 if __name__ == "__main__":
