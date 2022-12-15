@@ -1,14 +1,14 @@
 import sys
 from itertools import repeat
+from os import get_terminal_size
 from time import sleep
 
 
-# FILENAME = sys.argv[1] if len(sys.argv) > 1 else "test_input.txt"
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-SIGN = {'empty': '.', 'rock': '#', 'sand': 'o', 'start': '+'}
-SCREEN_HEIGHT = 50
+SCREEN_HEIGHT = get_terminal_size().lines - 2
 QUARTER_SCREEN = SCREEN_HEIGHT >> 2
 THREE_QUARTERS = SCREEN_HEIGHT - QUARTER_SCREEN
+SIGN = {'empty': '.', 'rock': '#', 'sand': 'o', 'start': '+'}
 
 
 class Sand:
@@ -88,20 +88,17 @@ def solve(filename: str) -> tuple[int, int]:
         sand_count += 1
         sleep(.2)
 
+    show_field(field)
     return sand_count, None
 
 
 def show_field(field: list[list[str | Sand]], sand: Sand = None) -> None:
     start, stop = 0, len(field)
-    if stop > SCREEN_HEIGHT:
-        # half = SCREEN_HEIGHT >> 1
-        if sand:
-            start = max(0, sand.y-THREE_QUARTERS)
-            stop = max(SCREEN_HEIGHT, sand.y+QUARTER_SCREEN)
-        else:
-            stop = SCREEN_HEIGHT
+    if stop > SCREEN_HEIGHT and sand is not None:
+        start = max(0, sand.y-THREE_QUARTERS)
+        stop = max(SCREEN_HEIGHT, sand.y+QUARTER_SCREEN)
 
-    print('\033[2J\033[H',
+    print('\033c',
           '\n'.join(''.join(str(field[start+y][x])
                             for x, _ in enumerate(line))
                     for y, line in enumerate(field[start:stop])),
