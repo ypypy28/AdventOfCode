@@ -10,6 +10,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = get_terminal_size()
 SCREEN_HEIGHT -= 1
 HALF_SCREEN_W = SCREEN_WIDTH >> 1
 QUARTER_SCREEN_W = SCREEN_WIDTH >> 2
+THREE_QUARTERS_W = SCREEN_WIDTH - QUARTER_SCREEN_W
 QUARTER_SCREEN_H = SCREEN_HEIGHT >> 2
 THREE_QUARTERS_H = SCREEN_HEIGHT - QUARTER_SCREEN_H
 SIGN = {'empty': '.', 'rock': '#', 'sand': 'o', 'start': '+'}
@@ -88,7 +89,7 @@ def solve(filename: str) -> tuple[int, int]:
         try:
             while sand.step_down():
                 show_field(field, sand)
-        except ValueError as e:
+        except ValueError:
             break
         if not part1_end and sand.end_of_part1:
             part1_end = True
@@ -106,8 +107,13 @@ def show_field(
     left, right = 0, len(field[0])
     if sand is not None:
         sleep(.02)
-        right = min(right, max(sand._start[0] + HALF_SCREEN_W, sand.x + QUARTER_SCREEN_W))
-        left = max(sand._start[0] - HALF_SCREEN_W, sand.x - QUARTER_SCREEN_W - HALF_SCREEN_W)
+        if right > SCREEN_WIDTH:
+            if sand.x < sand._start[0]:
+                left = max(0, min(sand._start[0] - HALF_SCREEN_W, sand.x - QUARTER_SCREEN_W))
+                right = min(right, left + SCREEN_WIDTH)
+            else:
+                right = min(right, max(sand._start[0] + HALF_SCREEN_W, sand.x + QUARTER_SCREEN_W))
+                left = max(0, right - SCREEN_WIDTH)
         if stop > SCREEN_HEIGHT:
             start = max(0, sand.y - THREE_QUARTERS_H)
             stop = max(SCREEN_HEIGHT, sand.y + QUARTER_SCREEN_H)
