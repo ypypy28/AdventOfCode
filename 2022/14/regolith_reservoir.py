@@ -26,9 +26,6 @@ class Sand:
         self.field[self.y][self.x] = self
         self.end_of_part1 = False
 
-    def __repr__(self) -> str:
-        return SIGN['sand']
-
     def step_down(self) -> bool:
         for dx, dy in self.DIRECTIONS:
             new_x, new_y = self.x+dx, self.y+dy
@@ -38,12 +35,13 @@ class Sand:
                 self.end_of_part1 = True
 
             if self.field[new_y][new_x] == SIGN['empty']:
-                self.field[new_y][new_x] = self
+                self.field[new_y][new_x] = SIGN['sand']
                 self.field[self.y][self.x] = SIGN['empty'] if new_y != 1 else SIGN['start']
                 self.x, self.y = new_x, new_y
                 return True
         if self.y == 0:
             raise ValueError("End of part2")
+        self.x, self.y = self._start
         return False
 
 
@@ -84,15 +82,15 @@ def solve(filename: str) -> tuple[int, int]:
 
     part1_end = False
     part1 = sand_count = 0
+    sand = Sand(sand_start_position, field)
     while True:
-        new_sand = Sand(sand_start_position, field)
         sand_count += 1
         try:
-            while new_sand.step_down():
-                show_field(field, new_sand)
+            while sand.step_down():
+                show_field(field, sand)
         except ValueError as e:
             break
-        if not part1_end and new_sand.end_of_part1:
+        if not part1_end and sand.end_of_part1:
             part1_end = True
             part1 = sand_count-1
 
@@ -101,13 +99,13 @@ def solve(filename: str) -> tuple[int, int]:
 
 
 def show_field(
-    field: list[list[str | Sand]],
+    field: list[list[str]],
     sand: Sand | None = None
 ) -> None:
     start, stop = 0, len(field)
     left, right = 0, len(field[0])
     if sand is not None:
-        sleep(.05)
+        sleep(.02)
         right = min(right, max(sand._start[0] + HALF_SCREEN_W, sand.x + QUARTER_SCREEN_W))
         left = max(sand._start[0] - HALF_SCREEN_W, sand.x - QUARTER_SCREEN_W - HALF_SCREEN_W)
         if stop > SCREEN_HEIGHT:
@@ -115,7 +113,7 @@ def show_field(
             stop = max(SCREEN_HEIGHT, sand.y + QUARTER_SCREEN_H)
 
     print('\033c',  # Escape sequence to clear terminal buffer (mb only in bash)
-          '\n'.join(''.join(str(field[start+y][left+x])
+          '\n'.join(''.join(field[start+y][left+x]
                             for x, _ in enumerate(line[left:right]))
                     for y, line in enumerate(field[start:stop])),
           sep='')
