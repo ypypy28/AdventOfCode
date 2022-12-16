@@ -1,11 +1,17 @@
 import sys
+import time
 from itertools import repeat
 from os import get_terminal_size
-from time import sleep
 
 
+
+MEDITATION = True if "slow" in sys.argv else False
+if MEDITATION:
+    sys.argv.remove("slow")
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 START_X = 500
+FPS = 90
+NANOSEC_TO_DRAW = 1000000000//FPS
 SCREEN_WIDTH, SCREEN_HEIGHT = get_terminal_size()
 HALF_SCREEN_W = SCREEN_WIDTH >> 1
 QUARTER_SCREEN_W = SCREEN_WIDTH >> 2
@@ -82,16 +88,34 @@ def solve(filename: str) -> tuple[int, int]:
     part1_end = False
     part1 = sand_count = 0
     sand = Sand(sand_start_position, field)
-    while True:
-        sand_count += 1
-        try:
-            while sand.step_down():
-                show_field(field, sand)
-        except ValueError:
-            break
-        if not part1_end and sand.end_of_part1:
-            part1_end = True
-            part1 = sand_count-1
+    if MEDITATION:
+        while True:
+            sand_count += 1
+            try:
+                while sand.step_down():
+                    time.sleep(0.02)
+                    show_field(field, sand)
+            except ValueError:
+                break
+            if not part1_end and sand.end_of_part1:
+                part1_end = True
+                part1 = sand_count-1
+    else:
+        lasttime = time.monotonic_ns()
+        while True:
+            sand_count += 1
+            try:
+                while sand.step_down():
+                    curtime = time.monotonic_ns()
+                    dt = curtime - lasttime
+                    if dt > NANOSEC_TO_DRAW:
+                        show_field(field, sand)
+                        lasttime = curtime
+            except ValueError:
+                break
+            if not part1_end and sand.end_of_part1:
+                part1_end = True
+                part1 = sand_count-1
 
     show_field(field)
     return part1, sand_count
@@ -104,7 +128,6 @@ def show_field(
     start, stop = 0, len(field)
     left, right = 0, len(field[0])
     if sand is not None:
-        sleep(.02)
         if right > SCREEN_WIDTH:
             if sand.x <= sand._start[0]:
                 left = max(0, min(sand._start[0] - HALF_SCREEN_W, sand.x - QUARTER_SCREEN_W))
