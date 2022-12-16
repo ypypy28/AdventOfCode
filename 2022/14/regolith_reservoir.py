@@ -7,7 +7,7 @@ from time import sleep
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 START_X = 500
 SCREEN_WIDTH, SCREEN_HEIGHT = get_terminal_size()
-SCREEN_HEIGHT -= 1
+# SCREEN_HEIGHT -= 1
 HALF_SCREEN_W = SCREEN_WIDTH >> 1
 QUARTER_SCREEN_W = SCREEN_WIDTH >> 2
 THREE_QUARTERS_W = SCREEN_WIDTH - QUARTER_SCREEN_W
@@ -122,7 +122,7 @@ def show_field(
           '\n'.join(''.join(field[start+y][left+x]
                             for x, _ in enumerate(line[left:right]))
                     for y, line in enumerate(field[start:stop])),
-          sep='')
+          sep='', end='')
 
 
 if __name__ == "__main__":
