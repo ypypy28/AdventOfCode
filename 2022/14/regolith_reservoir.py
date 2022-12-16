@@ -108,12 +108,12 @@ def show_field(
     if sand is not None:
         sleep(.02)
         if right > SCREEN_WIDTH:
-            if sand.x < sand._start[0]:
+            if sand.x <= sand._start[0]:
                 left = max(0, min(sand._start[0] - HALF_SCREEN_W, sand.x - QUARTER_SCREEN_W))
                 right = min(right, left + SCREEN_WIDTH)
             else:
-                right = min(right, max(sand._start[0] + HALF_SCREEN_W, sand.x + QUARTER_SCREEN_W))
-                left = max(0, right - SCREEN_WIDTH)
+                left = max(0, max(sand._start[0] - HALF_SCREEN_W, sand.x - THREE_QUARTERS_W))
+                right = min(right, left + SCREEN_WIDTH)
         if stop > SCREEN_HEIGHT:
             start = max(0, sand.y - THREE_QUARTERS_H)
             stop = max(SCREEN_HEIGHT, sand.y + QUARTER_SCREEN_H)
