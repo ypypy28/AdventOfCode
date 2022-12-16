@@ -7,7 +7,6 @@ from time import sleep
 FILENAME = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
 START_X = 500
 SCREEN_WIDTH, SCREEN_HEIGHT = get_terminal_size()
-# SCREEN_HEIGHT -= 1
 HALF_SCREEN_W = SCREEN_WIDTH >> 1
 QUARTER_SCREEN_W = SCREEN_WIDTH >> 2
 THREE_QUARTERS_W = SCREEN_WIDTH - QUARTER_SCREEN_W
@@ -24,7 +23,6 @@ class Sand:
         self.x = start_coords[0]
         self.y = start_coords[1]
         self.field = field
-        self.field[self.y][self.x] = self
         self.end_of_part1 = False
 
     def step_down(self) -> bool:
@@ -127,7 +125,7 @@ def show_field(
 
 if __name__ == "__main__":
     part1, part2 = solve(FILENAME)
-    print("ANSWER",
+    print("\nANSWER",
           f"Part 1: {part1}",
           f"Part 2: {part2}",
           sep='\n')
