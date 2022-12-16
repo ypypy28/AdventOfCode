@@ -79,11 +79,12 @@ def solve(filename: str) -> tuple[int, int]:
     floor = [[SIGN[name] for _ in range(size_x)] for name in ('empty', 'rock')]
     field += floor
 
-    offset_x = size_x >> 2
-    sand_start_position = (START_X - min_x + offset_x, 0)
-    field[0][START_X-min_x+offset_x] = SIGN['start']
+    center_x = size_x >> 1
+    sand_start_position = (center_x, 0)
+    offset_x = center_x - START_X
+    field[0][center_x] = SIGN['start']
     for x, y in rocks:
-        field[y][x-min_x+offset_x] = SIGN['rock']
+        field[y][x+offset_x] = SIGN['rock']
 
     part1_end = False
     part1 = sand_count = 0
