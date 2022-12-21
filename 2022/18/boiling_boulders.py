@@ -17,14 +17,14 @@ def get_neighbors(cube: Cube) -> tuple[Cube, Cube, Cube, Cube, Cube, Cube]:
     )
 
 
-def get_outside(lava: set[Cube],
-                maxx: int,
-                maxy: int,
-                maxz: int,
-                minx: int,
-                miny: int,
-                minz: int,
-                ) -> set[Cube]:
+def flood_outside(lava: set[Cube],
+                  maxx: int,
+                  maxy: int,
+                  maxz: int,
+                  minx: int,
+                  miny: int,
+                  minz: int,
+                  ) -> tuple[set[Cube], int]:
     maxx, maxy, maxz = (c + 2 for c in (maxx, maxy, maxz))
     minx, miny, minz = (c - 2 for c in (minx, miny, minz))
 
@@ -32,18 +32,23 @@ def get_outside(lava: set[Cube],
     outside = set((start,))
     queue = deque(outside)
 
+    touched_lava = 0
     while queue:
         neighbors = [cube for cube in get_neighbors(queue.popleft())
                      if (
-                         cube not in lava
-                         and cube not in outside
+                         # cube not in lava
+                         cube not in outside
                          and minx <= cube.x <= maxx
                          and miny <= cube.y <= maxy
                          and minz <= cube.z <= maxz
                      )]
+        with_lava = len(neighbors)
+        neighbors = [cube for cube in neighbors
+                     if cube not in lava]
+        touched_lava += with_lava - len(neighbors)
         outside.update(neighbors)
         queue.extend(neighbors)
-    return outside
+    return outside, touched_lava
 
 
 def solve(filename: str) -> tuple[int, int]:
@@ -75,18 +80,11 @@ def solve(filename: str) -> tuple[int, int]:
 
     part1 = len(cubes_of_lava)*6 - touching_sides
 
-    air_outside = get_outside(cubes_of_lava, maxx, maxy, maxz, minx, miny, minz)
-    cubes_of_air_touching_inside = {cube
-                                    for cube in cubes_of_air_touching_lava
-                                    if cube not in air_outside}
+    air_outside, touched_lava_outside = flood_outside(cubes_of_lava,
+                                                      maxx, maxy, maxz,
+                                                      minx, miny, minz)
 
-    touching_lava_from_inside = 0
-    for aircube in cubes_of_air_touching_inside:
-        touching_lava_from_inside += sum(n in cubes_of_lava
-                                         for n in get_neighbors(aircube))
-
-    part2 = part1 - touching_lava_from_inside
-    return part1, part2
+    return part1, touched_lava_outside
 
 
 if __name__ == "__main__":
